@@ -4,9 +4,11 @@ const app=express()
 const connectDB=require('./db/connect')
 const authRouter=require('./routes/auth')
 const jobsRouter=require('./routes/job')
+const bodyParser=require('body-parser')
 //port 
 const port=process.env.PORT || 4000
 
+app.use(bodyParser.json())
 app.use('/api/v1/auth',authRouter)
 app.use('/api/v1/jobs',jobsRouter)
 // start app
