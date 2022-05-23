@@ -1,5 +1,6 @@
 const jobModel=require('../models/jobModel')
 const {StatusCodes}=require('http-status-codes')
+const { NotFoundError, BadRequestError } = require('../errors')
 
 const getAllJobs=async (req,res)=>{
     const allJobs=await jobModel.find({createdBy:req.user.userId}).sort('createdAt')
@@ -10,18 +11,16 @@ const getJob=async(req,res)=>{
         user:{userId},
         params:{id:jobId}
     }=req
-try{
+
     const specificJob=await jobModel.findOne({
         _id:jobId,
         createdBy:userId
     })
     if(!specificJob){
-        console.log('no job with that id');
+        throw new NotFoundError('job not found')
     }
     res.status(StatusCodes.OK).json({specificJob})
-}catch(e){
-    console.log(e.message);
-}
+
    
 }
 const createJob=async(req,res)=>{
@@ -36,7 +35,7 @@ const deleteJob=async(req,res)=>{
         createdBy:userId
     })
     if(!jobToDelete){
-        console.log('not available');
+        throw new NotFoundError('job not found')
     }
     res.status(StatusCodes.OK).json({msg:"deleted"})
 }
@@ -47,18 +46,16 @@ const updateJob= async (req,res)=>{
         params:{ id:jobId}
     }=req
     if(company===''||position===''){
-        console.log('cannot be empty');
+        throw new BadRequestError('please provide the details')
     }
-    try{
+    
         const jobForUpdate=await jobModel.findByIdAndUpdate({_id:jobId,createdBy:userId},req.body,{new:true,runValidators:true})
     
         if(!jobForUpdate){
-            console.log("unavailable");
+            throw new NotFoundError('job not found')
         }
         res.status(StatusCodes.OK).send({jobForUpdate})
-    }catch(e){
-        console.log(e.message);
-    }
+   
     
 }
 
